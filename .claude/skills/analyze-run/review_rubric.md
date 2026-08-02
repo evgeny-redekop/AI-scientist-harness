@@ -53,9 +53,13 @@ Staging governs **presentation completeness only**. It never softens Duty A.
 - **KEY** (presented as the analysis result, or any stated conclusion): enforce the **full
   rubric**. This is where strictness belongs.
 
-**Two defects are gaps even at INTERMEDIATE stage**, because the step then does not do what it
+**Three defects are gaps even at INTERMEDIATE stage**, because the step then does not do what it
 claims: (1) a conclusion generalized beyond the single dataset/cut shown; (2) cropped, masked, or
-filtered data, or a fit not overlaid on the real unmasked data.
+filtered data, or a fit not overlaid on the real unmasked data; (3) a quantity extracted per curve
+(fit parameter, peak position, width, edge, threshold crossing) plotted as a trend without a
+preceding step that draws the extraction on the raw curves at several values of the control
+parameter, or plotted against a derived/theory-side abscissa before its dependence on the directly
+swept knob has been shown.
 
 ## 3. Always-included criteria (every objective)
 

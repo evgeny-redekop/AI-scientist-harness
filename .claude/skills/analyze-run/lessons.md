@@ -35,8 +35,9 @@ session only). "Re-fold lessons" = regroup bullets topically; archives untouched
 - NEVER crop, cut, clip, or mask plotted data — not the axis range, the signal range, or the
   colormap scale (no percentile vmax/vmin caps) — unless a supervisor explicitly asks. To
   de-emphasize a region, raise its transparency or add a labelled band; never remove it.
-- Every reduction is a labeled, motivated step: each crop, mask, smoothing window,
-  average/median, or detrend gets its OWN figure and a stated reason — never silently.
+- Every reduction gets its own figure and a stated reason: crops, masks, smoothing windows,
+  averages, detrends, and per-curve extractions. A reduction carried out inside the cell that
+  plots its result cannot be audited, because the reader sees only the output.
   (Sandve 2013; Tukey 1977)
 - NEVER average or take medians of the data you put on an x or y axis. Use statistics only
   when truly unavoidable; by default show a few line cuts at different values of the swept
@@ -75,21 +76,31 @@ session only). "Re-fold lessons" = regroup bullets topically; archives untouched
 - Zoom each symmetry/fold-check panel to the actual data span so the overlap is legible, and
   show a numerical fold-residual readout so consistency is demonstrated, not asserted.
 
-- Deliver VISUALS, not tables of derived numbers. A scientist can check a fit drawn on data by
-  eye and cannot check a column of fitted values; put numbers on the figure or in the narrative,
-  never as printed output. In notebooks every figure must render in-cell (`plt.show()`, never
-  `plt.close()`), and the committed notebook must be executed so the figures are embedded.
+- Put every derived number where it can be checked against the data that produced it: on the
+  figure, or in the narration beside it. A printed column of fitted values gives the scientist
+  nothing to judge; the check available is looking at the fitted curve drawn on the data.
   [2026-07-26]
+- In notebooks every figure renders in-cell (`plt.show()`, never `plt.close()`), and the
+  committed notebook is executed so the figures are embedded. [2026-07-26]
 
 ### Fitting and calibration
-- A fit is NEVER shown alone — always overlay it on the real data, plus a residual panel.
+- Show every fit as a curve overlaid on the unreduced data, with a residual panel and the fit
+  window drawn on the same axes. The drawn window must be exactly the set of points the fit
+  consumed, so the reader can verify the coverage claimed for it.
   (Hughes & Hase 2010; Numerical Recipes Ch. 15)
-- Fit windows must be drawn truthfully on the data they were fit to, so the reader can
-  verify the fit covers exactly the claimed points.
-- State the fit window and what was excluded; report parameters WITH uncertainties, not bare
-  best-fit values. (Hughes & Hase 2010; Taylor 1997)
-- Justify fit quality with a NUMBER (reduced χ² / residual structure), not by eye.
-  (Bevington; Andrae 2010)
+- Verify that the drawn window contains the feature the fitted parameter describes. A window
+  that excludes the transition still converges and still returns a transition temperature,
+  extrapolated beyond every fitted point. Mark any fitted parameter that falls outside the
+  fitted range as an extrapolation on the figure. [2026-07-26]
+- State the fit window and the exclusions, and report every parameter with its uncertainty.
+  (Hughes & Hase 2010; Taylor 1997)
+- Quantify fit quality with a number (reduced χ², residual structure) and resolve that number
+  against the control parameter, drawing the fit on the data at several values spanning its
+  range. An aggregate rms is admissible only once you have shown the rms is flat across the
+  range; otherwise it conceals a model that fits well in one part and fails in another, and it
+  will select the wrong model. The same applies to a median quoted over a range-interpolated
+  result: check it against the points that actually produce the answer.
+  (Bevington; Andrae 2010) [2026-07-26]
 - Prefer self-measured calibrations to stored values: measure zeros/offsets from the
   symmetry of the data in hand rather than a nominal axis value; report any drift from the
   stored value, and always state which zero/calibration you used.
@@ -119,18 +130,6 @@ session only). "Re-fold lessons" = regroup bullets topically; archives untouched
 - When the extracted value could plausibly depend on the fit-window choice, vary the window
   edges and report how much the result moves. Use judgment: a quick sensitivity check where
   it matters, not a ritual for every fit. [2026-07-14]
-
-- Judge a fit by LOOKING at it, not by an aggregate number. Draw the fitted curve on the data
-  at several points spanning the control parameter, and resolve every goodness metric against
-  that parameter rather than averaging over it. A mean or median rms is meaningful only once
-  you have shown the rms is flat across the range; otherwise it hides that the model fits well
-  in one part and fails in another, and it will select the wrong model. The same caution applies
-  to any per-item median quoted about a range-interpolated result — check it against the points
-  that actually produce the answer. [2026-07-26]
-- Draw the fit window ON the data and verify it contains the feature the fitted parameter
-  describes. A window that excludes the transition will still converge and still return a
-  transition temperature — extrapolated outside every fitted point. If the extracted parameter
-  falls outside the fitted range, mark it as an extrapolation on the figure. [2026-07-26]
 - Before running any bounded fit or bounded search, CHECK EVERY BOUND AND SEED: each initial
   guess must lie strictly inside its own bounds, and each bound must admit the values the data
   plausibly needs. A seed outside its bound makes the optimizer raise, the point is recorded as
@@ -139,6 +138,20 @@ session only). "Re-fold lessons" = regroup bullets topically; archives untouched
   applies to fit windows and search ranges: an optimizer or peak-finder that can rail against a
   range edge will return the edge, not a measurement, so report how often a bound is active and
   widen it to check. [2026-07-26]
+
+### Extracting a quantity and plotting its dependence
+- Any quantity extracted per curve (a fit parameter, a peak position, a width, an edge, a
+  threshold crossing) requires its own extraction-demonstration step, presented and approved,
+  before it appears as a trend. That step draws the extraction on the raw curves at several
+  values of the control parameter spanning its range, including both extremes and any curve
+  where the extraction is marginal, with the window or search region marked. This binds every
+  extraction method, not only least-squares fits. A trend plot whose extraction has not been
+  shown on the data is a gap at that step. [2026-08-02]
+- Plot an extracted quantity first against the directly swept experimental knob, one trace per
+  other swept knob, and present that figure before any version using a derived or theory-side
+  abscissa. The replot states the transformation and keeps the direct-observable version beside
+  it. Reaching a derived abscissa before the raw dependence has been seen hides whether the
+  structure lives in the data or in the transformation. [2026-08-02]
 
 ### Mapping a fitted number onto a theory parameter
 - Before converting a fitted quantity (an exponent, a slope, a width) into a named theory

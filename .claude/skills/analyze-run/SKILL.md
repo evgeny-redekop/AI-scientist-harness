@@ -179,8 +179,10 @@ along with the device profile/lessons paths, the objective, and the file paths. 
 - **B — figure/claim review, staged.** `INTERMEDIATE`: does the figure do what *this step* claims
   (default pass; finished-paper criteria out of scope). `KEY` (any stated conclusion or the
   result figure): the full rubric. **Staging governs presentation completeness only — never
-  correctness.** Two defects are gaps even at INTERMEDIATE: a conclusion generalized beyond the
-  one dataset/cut shown, and cropped/masked data or a fit not overlaid on real data.
+  correctness.** Three defects are gaps even at INTERMEDIATE: a conclusion generalized beyond the
+  one dataset/cut shown; cropped/masked data or a fit not overlaid on real data; and a per-curve
+  extracted quantity plotted as a trend before a step that draws the extraction on the raw curves,
+  or plotted against a derived abscissa before its dependence on the swept knob has been shown.
 
 **Loop:** blind pass (figure + objective + rubric — **never** your narrative;
 blindness is the point) → if gaps, send a rebuttal in **this exact format,
