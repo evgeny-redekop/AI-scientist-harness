@@ -1,5 +1,8 @@
 # CLAUDE.md
 
+<!-- Expands the full analyze-run skill body into context before the first prompt. -->
+@.claude/skills/analyze-run/SKILL.md
+
 This repository is a **portable Claude Code harness for measurement-data analysis**: generic
 analysis skills plus per-device knowledge directories. It has no dependence on any other
 repository — device data loaders are vendored under each device's `lib/`.
@@ -30,9 +33,9 @@ directory under `devices/` (start from `devices/TEMPLATE/`) and update this poin
   whole pipeline when a claim will not firm up; plus `analysis-executor` — the executor half of
   **directed mode** (`analyze-run` §10). When the session model outranks the executor's pinned
   model, the session directs and the executor computes; it is hands, never head.
-- **SessionStart hook** (`hooks/analyze_run_autoload.sh`, optional but recommended): injects
-  the `analyze-run` skill body at every session start inside a harness checkout, so the rules
-  survive resume and compaction. Install per README.
+- **Hooks** (`hooks/`, registered in `.claude/settings.json`): `notebook_sync.sh` mirrors
+  worktree `.py` edits onto the live `.ipynb`; `analyze_run_autoload.sh` marks the
+  `analyze-run` rules active at session start.
 - **Deliverables** live under the device's `analyses/<topic>_<runids>/` (percent `.py`
   committed as source of truth, paired `.ipynb` as live view — `jupytext.toml` at root).
 - **Journal protocol:** the journal is the append-only scientific record. Every result ties
@@ -45,8 +48,9 @@ These apply in every session, with or without a skill:
 - **Load `analyze-run` before touching measurement data.** Before writing or running any code
   against measurement data (loading a run, plotting, fitting, extending a notebook, or
   continuing work under an `analyses/` directory), the `analyze-run` skill must be active. The
-  SessionStart hook injects it automatically inside a harness checkout; if its rules are not
-  in context (e.g. a resumed or compacted session), invoke it via the Skill tool first. This
+  `@.claude/skills/analyze-run/SKILL.md` import at the top of this file expands the whole body
+  into context at startup, and it survives resume and compaction; if its rules are somehow
+  absent, the import is misconfigured, so invoke the skill via the Skill tool and say so. This
   rule is what makes the rest of this list actually bind.
 - **Stop after every analysis step and wait for permission.** Present the figure, what it shows,
   and the reviewer's numbered gaps; then stop. Do not start the next step, or queue work in the

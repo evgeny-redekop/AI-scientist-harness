@@ -74,7 +74,8 @@ CLAUDE.md                      # always-on rules + active experiment pointer (SW
     voice-pacifist.md
     voice-idealist.md
 hooks/
-  analyze_run_autoload.sh      # SessionStart hook: loads analyze-run at every session start
+  analyze_run_autoload.sh      # SessionStart: marks the analyze-run rules active
+  notebook_sync.sh             # keeps a worktree .py and the live .ipynb in step
 devices/
   <your-experiment>/           # private: profile, journal, lib, analyses
     profile.md                 # single source of system truth
@@ -93,7 +94,25 @@ jupytext.toml                  # .py percent files are source of truth; .ipynb i
 1. Clone this repository (or add it as a `git remote` called `upstream` in a private fork and pull from there).
 2. Copy `devices/TEMPLATE/` to `devices/<your-experiment>/` and fill in `profile.md`. See **What you bring** above for what goes in it.
 3. Update the `CLAUDE.md` "Active device" line to point at your new directory. This is the SWAP POINT.
-4. (Recommended) Install the SessionStart hook so analysis rules survive session resume and compaction. Register it in `~/.claude/settings.json` (global) or the project `.claude/settings.json`:
+4. Open Claude Code in your working directory and describe what you want: "plot signal vs gate voltage for run 12", "fit the 200–250 K temperature sweep", "run three voices on open question 3", "!always subtract the baseline measured in run 3".
+
+There is no install step for the rules or the hooks. Both are wired up by files already in the checkout, described next. Claude Code will ask you once to approve the project's `.claude/settings.json`.
+
+## How the rules reach the model
+
+`CLAUDE.md` begins with
+
+```markdown
+@.claude/skills/analyze-run/SKILL.md
+```
+
+which expands the whole ~17 KB skill file into context before the first prompt, unconditionally, and survives resume and compaction. The expansion is mechanical, so it does not depend on the model choosing to open anything.
+
+Use an import for this. Claude Code caps hook output at 10,000 characters and replaces anything longer with a ~2 KB preview plus a path to a file holding the rest, which sessions rarely open. That cap is why the skill body travels through `CLAUDE.md`; a hook is the right place for a short notice about it.
+
+## Hooks
+
+`.claude/settings.json` registers them through `$CLAUDE_PROJECT_DIR`, so the copies tracked in this repository are the ones that run, in the main checkout and in every worktree:
 
 ```json
 {
@@ -101,15 +120,15 @@ jupytext.toml                  # .py percent files are source of truth; .ipynb i
     "SessionStart": [
       { "matcher": "startup|resume|clear|compact",
         "hooks": [ { "type": "command",
-                     "command": "/absolute/path/to/hooks/analyze_run_autoload.sh" } ] }
+                     "command": "\"$CLAUDE_PROJECT_DIR/hooks/analyze_run_autoload.sh\"" } ] }
     ]
   }
 }
 ```
 
-The hook walks up from the session directory to find the skill; it hard-codes no path.
+Registering from inside the repository is deliberate. A path pointing at a copy elsewhere on the machine drifts out of date, and an edit to the tracked file then has no effect on real sessions.
 
-5. Open Claude Code in your working directory and describe what you want: "plot signal vs gate voltage for run 12", "fit the 200–250 K temperature sweep", "run three voices on open question 3", "!always subtract the baseline measured in run 3".
+`notebook_sync.sh` mirrors a jupytext `.py` edited inside a worktree onto the live `.ipynb` in the project folder, and pulls the live version back before a read. Anything it would overwrite is copied to a timestamped backup directory first. It needs `jupytext` on `PATH` or at `$JUPYTEXT_BIN`.
 
 ## Adding a new experiment
 
