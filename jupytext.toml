@@ -1,0 +1,13 @@
+# Jupytext folder config.
+#
+# Pair every notebook opened in this folder with a percent-format .py twin
+# (markdown cells -> `# %% [markdown]`, code cells -> `# %%`). Edit either side;
+# the Jupyter/VS Code jupytext extension syncs on save, or run
+#     jupytext --sync <file>.py
+# from a shell. Commit the .py (clean text, real diffs); the .ipynb is a local
+# rendered view and is gitignored.
+#
+# This only affects files actually opened *as notebooks*. Plain engine modules
+# (plot_runs_526_530.py, compare_temperatures.py) are imported, never opened as
+# notebooks, so they are not paired and no stray .ipynb is created for them.
+default_jupytext_formats = "ipynb,py:percent"

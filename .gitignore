@@ -1,0 +1,8 @@
+.DS_Store
+*.ipynb
+__pycache__/
+
+# measurement databases (large binaries; live beside the working copy, never tracked)
+*.db
+*.db-wal
+*.db-shm
