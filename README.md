@@ -1,144 +1,99 @@
-# measurement-harness
+# AI-scientist-harness
 
-A portable [Claude Code](https://claude.com/claude-code) harness for credible, precise
-analysis of experimental measurement data. You chat; the harness supplies the discipline.
+A [Claude Code](https://claude.com/claude-code) harness for collaborative analysis of experimental measurement data. It separates analysis craft (generic, in this repository) from knowledge of your specific system (private, written by you).
 
-Born from a condensed-matter transport experiment (a gated Josephson-junction array in a
-dilution refrigerator), but built around a strict split:
+The central idea is a **system profile**: a structured document you write once about your experiment. The AI reads it at the start of every session to understand what you are measuring, what can go wrong, and what you are trying to learn.
 
-- **Generic layer** — analysis craft that holds for any measurement campaign. Contains no
-  device names, no instrument names, no target phenomena (enforced by grep — see below).
-- **Device layer** — everything specific to one chip/setup/campaign, in one swappable
-  directory under `devices/`.
+## What you bring
 
-Moving to a new device or experiment = writing one new directory under `devices/`. The
-harness itself never changes.
+Before any analysis session, you write `profile.md` for your experimental system. This is what lets the AI reason about your measurements rather than treating them as abstract numbers.
 
-## Two copies: generic skeleton vs working copy
+A complete profile covers five areas.
 
-This repository is designed to exist as **two copies cut from the same tree**:
+**The science.** What phenomenon are you studying? Name the effects you expect to see, the parameter ranges where they should appear, and the competing explanations that would produce similar signals. The AI cannot exclude a mundane explanation (thermalization, noise floor, calibration drift) unless the alternatives are written down and the profile states what evidence would rule them out.
 
-| | **Generic skeleton** | **Working copy** |
+**System vulnerabilities and weak spots.** Every measurement setup has failure modes that can look like signal: drifting offsets, pickup at specific frequencies, an amplifier that clips at high drive, a contact that degrades at low temperature. List yours. Without this list, the AI has no basis for flagging a suspicious feature before you do.
+
+**Hypotheses under test.** For each effect you are looking for, state what discriminating evidence would confirm it, and what would rule it out. This gives analysis a concrete standard for when a conclusion is defensible.
+
+**The measurement setup.** Signal chain, instruments, gains, units, and calibrations. If a conversion factor lives anywhere other than this document, it will drift or get lost.
+
+**Data access.** How to load your data files: format, path conventions, the loader function. The harness vendors your loader under `devices/<name>/lib/` so it stays alongside the profile.
+
+## How the collaboration works
+
+Sessions run as a sequence of analysis steps. At each step, the AI loads your data and produces a figure or fit; a built-in reviewer agent audits the computation before you see it. You see the figure, the reviewer's numbered concerns, and a proposed interpretation. You respond: approve the step, redirect it, or correct a factual error. Corrections become durable rules via the `!rule` protocol, routed to the generic skill or to your device profile depending on scope.
+
+Open questions and data gaps go into a journal (append-only, one file per topic). When discriminating data does not yet exist, the analysis writes a concrete measurement request to `journal/data_requests.md` and stops. Journal conclusions are proposed by the AI and approved by you before they are written.
+
+For large computations, **directed mode** splits the work: the session model (director) owns all reasoning and reads every figure itself; a pinned-model executor runs the code. This lets you use a stronger model for judgment while keeping compute costs predictable.
+
+## What the harness enforces
+
+**Every analysis starts from the full list of competing explanations**, including the mundane ones from your profile. An effect can be named in a conclusion only after its discriminators pass and the alternatives are addressed.
+
+When discriminating data does not exist, the analysis writes a concrete sweep request to `journal/data_requests.md` and stops.
+
+**Figures show everything**: no cropping or masking of plotted data; every fit is overlaid on the full data with residuals, stated windows, and uncertainties; every run id appears on the figure; every saved PNG is read back by the AI before it is described.
+
+Quick plots stay quick. "Put this in the notebook" promotes work into an append-only Jupytext `.py` file that reproduces top-to-bottom. The `.py` is committed as source of truth; the `.ipynb` is a view.
+
+**Literature checking** runs in a background lane: before an interpretive claim is written up, the AI checks it against the literature and records the findings in `journal/background_literature.md` with verified citations.
+
+## Public skeleton and private working copy
+
+This repository is the public skeleton. To use it, clone it privately and add your experiment directory. The two copies differ by exactly two things: the files present (your working copy adds `devices/<name>/`) and one pointer line in `CLAUDE.md` (marked in-file as the SWAP POINT).
+
+| | Public skeleton | Private working copy |
 |---|---|---|
-| Visibility | **public** | **private** |
-| Active device | `devices/TEMPLATE/` | a real device, e.g. `devices/M55D8/` |
-| Contains real data / results? | **no** | yes |
-| Purpose | a publishable, reusable framework | day-to-day analysis of one device |
+| Visibility | public | private |
+| Active experiment | `devices/TEMPLATE/` | `devices/<your-experiment>/` |
+| Contains real data or results | no | yes |
 
-They differ by exactly two things: **which files are present** (the working copy adds a real
-`devices/<name>/`) and **one pointer line** (`CLAUDE.md` → "Active device", marked in-file as
-the SWAP POINT). Everything else is byte-identical and shared.
-
-**The boundary — what belongs to which layer:**
-
-- **Generic (safe to publish):**
-  `.claude/skills/`, `.claude/agents/`, `CLAUDE.md` (pointer at `TEMPLATE`), `devices/TEMPLATE/`,
-  `hooks/`, `jupytext.toml`, `README.md`. These carry analysis discipline only — no device
-  name, instrument name, run id, gate/knob name, calibration number, or target phenomenon.
-- **Device-specific (private — never publish):**
-  the entire real `devices/<name>/` directory:
-  - `profile.md` — wiring, gains, calibrations, hard limits, established facts;
-  - `journal/` — the campaign's scientific record, including unpublished results and
-    literature notes;
-  - `analyses/` — notebooks and figures built on real data;
-  - `lib/` — vendored data loaders, which can encode lab/setup specifics.
-
-**The enforceable gate.** The *craft* files must stay device-token-free — the skills, agents,
-TEMPLATE, and hooks carry analysis discipline only. This is checked by grep, so it is
-mechanical, not a matter of trust:
+The craft files (`.claude/skills/`, `.claude/agents/`, `hooks/`, `devices/TEMPLATE/`) carry analysis discipline with no experiment-specific content. Before publishing any changes to the public skeleton, verify this with grep:
 
 ```sh
 # Run from the repo root. Must print nothing.
-grep -RInE 'M55D8|InAs|Josephson|\bVf\b|\bVt\b|R_Q|<other device tokens>' \
-  .claude/ devices/TEMPLATE hooks/
+grep -RInE '<your-experiment-tokens>' .claude/ devices/TEMPLATE hooks/
 ```
-
-Two files are deliberately outside this scan and may name the working device:
-`CLAUDE.md`, whose "Active device" pointer *is* the swap point (it names the real device in
-the working copy, `TEMPLATE` in the public skeleton), and `README.md`, which uses the device
-as a documentation example. Neither carries device *content* — only the device *name*, which
-is not sensitive; the private material is the profile, journal, analyses, and loaders under
-`devices/<name>/`, which are never published.
-
-If a device token appears in a *craft* file, that content is in the wrong layer: move it into
-the device `profile.md`/`journal/`. The `!rule` protocol already routes new lessons
-generic-vs-device for exactly this reason.
 
 ## Layout
 
 ```
-CLAUDE.md                     # always-on rules + "active device" pointer (the SWAP POINT)
+CLAUDE.md                      # always-on rules + active experiment pointer (SWAP POINT)
 .claude/
   skills/
-    analyze-run/              # the workhorse: analysis discipline + notebook workflow
-      SKILL.md                #   incl. §10 directed mode (director/executor split)
-      lessons.md              # generic operator-taught rules (grows via !rule)
-    three-voices/             # isolated-context deliberation on a physics fork
+    analyze-run/               # analysis discipline + notebook workflow
+      SKILL.md                 #   includes directed mode (§10)
+      lessons.md               # operator-taught rules, grows via !rule
+    three-voices/              # deliberation on a contested scientific claim
       SKILL.md
   agents/
-    analysis-executor.md      # directed-mode executor — hands, not head (pinned model)
-    voice-skeptic.md          # three deliberation voices with distinct motives
+    analysis-executor.md       # directed-mode executor (pinned model)
+    voice-skeptic.md           # three deliberation voices with distinct priors
     voice-pacifist.md
     voice-idealist.md
 hooks/
-  analyze_run_autoload.sh     # SessionStart hook: auto-loads analyze-run in a checkout
+  analyze_run_autoload.sh      # SessionStart hook: loads analyze-run at every session start
 devices/
-  M55D8/                      # working device (PRIVATE): Al/InAs Josephson junction array
-    profile.md                # single source of device truth
-    lessons.md                # device-taught rules + raw teaching archive
-    lib/                      # vendored data loaders (qc_io.py, plotting.py) — standalone
-    journal/                  # campaign state: open questions, dead ends, run memory,
-                              #   background literature (Zotero-cited), data requests, SCHEMA
-    analyses/                 # notebook deliverables (<topic>_<runids>/)
-  TEMPLATE/                   # GENERIC skeleton for the next device (self-contained)
+  <your-experiment>/           # private: profile, journal, lib, analyses
+    profile.md                 # single source of system truth
+    lessons.md                 # experiment-taught rules
+    lib/                       # vendored data loader
+    journal/                   # open questions, dead ends, run memory, data requests
+    analyses/                  # notebook deliverables
+  TEMPLATE/                    # copy this to start a new experiment
     profile.md
     journal/SCHEMA.md
-jupytext.toml                 # .py percent files are source of truth; .ipynb is a view
+jupytext.toml                  # .py percent files are source of truth; .ipynb is a view
 ```
 
-## What the harness enforces
+## Getting started
 
-- **No presupposed findings.** Analyses start from the device picture and a list of ALL
-  competing explanations — always including the mundane ones (thermalization, noise floor,
-  calibration drift). A phase/effect may be named in a conclusion only when its
-  discriminators pass and the alternatives are addressed. Target phenomena are defined only
-  in the device profile, as hypotheses with proof requirements.
-- **Data gaps become measurement requests**, not conclusions: if the discriminating data
-  doesn't exist, the analysis writes a concrete sweep request to `journal/data_requests.md`
-  and asks the scientist.
-- **Show everything**: no cropping/masking of plotted data; every figure carries run ids;
-  every fit is overlaid on the real data with residuals, stated windows, and uncertainties;
-  every saved figure is visually read back before it is described.
-- **Notebooks on request**: quick plots stay quick; "put this in the notebook" promotes work
-  into an append-only Jupytext notebook that reproduces top-to-bottom.
-- **Literature with receipts**: a background lane checks interpretive moves against the
-  literature and records findings in `journal/background_literature.md` with verified
-  citations (Zotero key + DOI).
-- **Directed mode** (`analyze-run` §10): when the session runs a stronger model than the
-  `analysis-executor` agent's pinned model, the session *directs* (owns all reasoning, reads
-  every figure itself, holds the hypothesis list) and dispatches the executor to *compute*.
-  The executor never chooses next steps or interprets; if its report contradicts a figure,
-  the figure wins.
-- **The scientist owns the conclusions.** Journal edits are proposed, then approved. The
-  `!rule` protocol turns corrections into durable lessons, routed generic-vs-device.
-
-## Using it
-
-1. Clone (or copy `.claude/` + `CLAUDE.md` + `hooks/` + your device dir into a working folder
-   that can see your data).
-2. Point `CLAUDE.md` → "Active device" (the SWAP POINT) at your device directory.
-3. (Recommended) Install the SessionStart hook so the discipline survives resume/compaction —
-   see below.
-4. Open Claude Code in that folder and talk: "plot R vs gate for run 530", "analyze the
-   580–582 temperature family", "run three voices on <question id>", "!never do X".
-
-### Installing the SessionStart hook
-
-The hook injects the `analyze-run` skill body at every session start inside a harness
-checkout, so a resumed or compacted session still has the rules. It hard-codes no path — it
-walks up from the session cwd to the nearest `.claude/skills/analyze-run/SKILL.md`.
-
-Register it in `~/.claude/settings.json` (global) or the project `.claude/settings.json`:
+1. Clone this repository (or add it as a `git remote` called `upstream` in a private fork and pull from there).
+2. Copy `devices/TEMPLATE/` to `devices/<your-experiment>/` and fill in `profile.md`. See **What you bring** above for what goes in it.
+3. Update the `CLAUDE.md` "Active device" line to point at your new directory. This is the SWAP POINT.
+4. (Recommended) Install the SessionStart hook so analysis rules survive session resume and compaction. Register it in `~/.claude/settings.json` (global) or the project `.claude/settings.json`:
 
 ```json
 {
@@ -146,30 +101,16 @@ Register it in `~/.claude/settings.json` (global) or the project `.claude/settin
     "SessionStart": [
       { "matcher": "startup|resume|clear|compact",
         "hooks": [ { "type": "command",
-                     "command": "/ABSOLUTE/PATH/TO/measurement-harness/hooks/analyze_run_autoload.sh" } ] }
+                     "command": "/absolute/path/to/hooks/analyze_run_autoload.sh" } ] }
     ]
   }
 }
 ```
 
-## Adding a device
+The hook walks up from the session directory to find the skill; it hard-codes no path.
 
-Copy `devices/TEMPLATE/` to `devices/<name>/`, fill in `profile.md` (data access & loader,
-signal chain, knobs & hard limits, calibrations, established facts with provenance,
-hypotheses under test with discriminators), seed the `journal/` from its `SCHEMA.md`, and
-update the `CLAUDE.md` pointer. Vendor the device's data loader under `lib/`.
+5. Open Claude Code in your working directory and describe what you want: "plot signal vs gate voltage for run 12", "fit the 200–250 K temperature sweep", "run three voices on open question 3", "!always subtract the baseline measured in run 3".
 
-## Publishing the generic skeleton
+## Adding a new experiment
 
-To cut the public skeleton from this (private) working copy without leaking anything:
-
-1. Work on a branch or a fresh clone — never publish the working copy directly.
-2. Remove every real device: `git rm -r devices/<name>` for each real device (keep
-   `devices/TEMPLATE/`).
-3. Point `CLAUDE.md` → "Active device" at `devices/TEMPLATE/` (the SWAP POINT).
-4. Run the grep gate above; it must print nothing. Fix any hit by moving that content into a
-   device dir (which you are not publishing).
-5. Push to the public repository.
-
-Because the two copies share history, framework improvements flow between them with ordinary
-git; only the device directories and the pointer line ever differ.
+Copy `devices/TEMPLATE/` to `devices/<name>/`, fill in `profile.md`, seed the journal from its `SCHEMA.md`, update the `CLAUDE.md` pointer, and vendor your data loader under `lib/`.
