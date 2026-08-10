@@ -1,7 +1,9 @@
 # CLAUDE.md
 
-<!-- Expands the full analyze-run skill body into context before the first prompt. -->
+<!-- Expands the full analyze-run skill body and instance-specific integrations into
+     context before the first prompt. -->
 @.claude/skills/analyze-run/SKILL.md
+@.claude/integrations.md
 
 This repository is a **portable Claude Code harness for measurement-data analysis**: generic
 analysis skills plus per-device knowledge directories. It has no dependence on any other
