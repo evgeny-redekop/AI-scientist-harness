@@ -81,32 +81,40 @@ what CAN be settled.
   rewrite completed steps.
 - Every figure: `savefig` to the analysis `figures/` dir, then **Read the PNG yourself
   before narrating it** — never describe a figure you haven't looked at.
-- **Never crop, cut, clip, or mask plotted data** — not axis ranges, not color scales — 
-  unless the user explicitly asks. Mask ONLY to define a fit window; then mark the masked
-  region on the figure and overlay the fit on the unmasked data.
+- **Never crop, cut, or clip plotted data.** Mask ONLY to define a fit window; then mark
+  the masked region on the figure and overlay the fit on the unmasked data. Full rule, including
+  the de-emphasis alternative, in `lessons.md` under Data integrity.
 - Dataset/run ids on every figure; clear, concise axis labels; minimal on-plot text.
 - Read every setpoint from the dataset's own metadata — never assume or carry values between
   datasets; if a value is absent, ask.
-- **Verify each hypothesis across ALL loaded datasets** (and several cuts within each)
-  before stating a conclusion; say where it holds and where it breaks.
-- **Robustness within a dataset is the harder half of that check.** "It appears in dataset N" is
-  not robustness; showing the claim does not move when the cut, fit window, sub-range, or branch
-  moves is. Test the choices made *inside* each dataset, not only the presence of the feature
-  across datasets.
+- **Perturb the choices that produced a number or a fit, and report how far the result moved.** Move the fit
+  window edges, change the seed values. Report the
+  spread over the scan against the fit's own uncertainty, σ_syst/σ_stat: above 1 the number is probably a
+  property of the window rather than of the data. For a power-law or scaling quantity also report
+  the log sensitivity d(ln θ)/d(ln w), dimensionless and therefore comparable to the exponent
+  itself; an exponent flat as the window slides in log space marks a real scaling regime, one
+  that drifts marks a crossover fitted over a finite window.
 - **Coverage table** for any claim: one row per dataset in scope, marked supports / contradicts /
   n/a / **NOT EXAMINED**. Any NOT EXAMINED row caps the verdict at *suggestive* (§3). The table
   makes an omission visible instead of letting it hide in prose.
-- **Record what you left out.** State which runs, ranges, and regimes you used and which you
+- Record what you left out. State which runs, ranges, and regimes you used and which you
   excluded, and why — so the choice can be re-opened later (§9 pipeline audit) instead of being
   inherited as given.
-- Fits: overlay on the real data + residual panel; state the window and exclusions; report
-  parameters WITH uncertainties; justify quality with a number (reduced χ² / residual
-  structure), not by eye. Sanity-check every derived number against what is visible by eye —
-  if an algorithm contradicts the obvious structure, the algorithm is suspect.
-- No interpolation without flagging it and giving the bracketing measured points. No
-  dataset moment-statistics as physics conclusions. Treat variation at or below the swept
-  axis's grid pitch or measured noise scale as unresolved — never interpret sub-resolution
-  wobble as a real feature.
+- **Fits: overlay on the real data + residual panel.** State the window and exclusions; report
+  parameters WITH uncertainties. **Fit quality takes two readings and both are required: a
+  number (reduced χ² / residual structure), and your own reading of the drawn fit.** A number
+  on its own does not establish quality, and neither does an impression.
+- **Write down what you saw.** After you look at a fit figure, put one or two lines in that
+  step's markdown cell: where the curve tracks the data, where it departs, and whether the
+  residual panel shows structure rather than scatter. An assessment you made and did not record
+  cannot be checked, disagreed with, or improved. This is the same duty as reading the PNG
+  before narrating it, carried through to the fit.
+- **When the number and the figure disagree, the figure decides**, and the disagreement is
+  itself reported. A converged fit with a respectable χ² that contradicts the visible curve
+  shape is the failure mode this rule exists for. If there is a clear visible discrepancy,
+  you must adjust the fit window or model until the figure and the number agree, and report the
+  change in the ledger. If you cannot reconcile them, report the disagreement and do not
+  claim the number as a result.
 - State which zero / calibration / units every derived quantity uses — never ambiguous.
 
 ## 6. Execution model
@@ -119,24 +127,11 @@ what CAN be settled.
 - After each step, sync the paired notebook (`jupytext --sync`) so the user's live view is
   current. The `.py` file is the single write surface.
 
-### The step gate — STOP after every step
+### The step gate: STOP after every step
 
-**The analysis does not advance without the user's permission.** After each step: run the review
-(§9), fix the clear-cut defects, then present and **wait**.
-
-- Present: the figure(s) and what the step actually shows; the reviewer's findings as **numbered**
-  gaps, computation gaps first; what you already fixed, what you contested and why, what is
-  unresolved.
-- Then stop. Do not begin the next step, and do not queue work in the background, until the user
-  responds.
-- **The user is authoritative; the reviewer is advisory to him.** He may endorse all gaps, a
-  subset ("gaps 1 and 3"), dismiss them, or overrule with his own instruction — in either
-  direction, including telling the reviewer it is wrong. Number every gap so a subset is
-  addressable.
-- **Fix first, then present.** Never hand him work you already know is defective; his attention is
-  for judgement, not for defects the reviewer just named.
-- Corrections at the gate steer the run; a message starting `!` persists as a durable lesson via
-  the `!rule` protocol.
+**The step gate is a harness-level rule and lives in the project `CLAUDE.md`**, under Always-on
+non-negotiables, because it binds every session with or without this skill. In short: review,
+fix the clear-cut defects, present, wait. Read it there; it is not restated here.
 
 ## 7. Background literature lane (the "theorist")
 
@@ -179,10 +174,8 @@ along with the device profile/lessons paths, the objective, and the file paths. 
 - **B — figure/claim review, staged.** `INTERMEDIATE`: does the figure do what *this step* claims
   (default pass; finished-paper criteria out of scope). `KEY` (any stated conclusion or the
   result figure): the full rubric. **Staging governs presentation completeness only — never
-  correctness.** Three defects are gaps even at INTERMEDIATE: a conclusion generalized beyond the
-  one dataset/cut shown; cropped/masked data or a fit not overlaid on real data; and a per-curve
-  extracted quantity plotted as a trend before a step that draws the extraction on the raw curves,
-  or plotted against a derived abscissa before its dependence on the swept knob has been shown.
+  correctness.** Some defects are gaps even at INTERMEDIATE; the list is rubric §2, which the
+  reviewer applies verbatim, and it is the copy to edit when the list changes.
 
 **Loop:** blind pass (figure + objective + rubric — **never** your narrative;
 blindness is the point) → if gaps, send a rebuttal in **this exact format,
@@ -213,21 +206,20 @@ Then present at the **step gate** (§6) and wait.
 
 ### Pipeline audit — when a claim will not firm up
 
-Do NOT report "not defensible" yet: the usual cause is that the analysis is being refined *inside*
-a badly-chosen data scope, because the runs, range, and regime were picked first and are now
-treated as fixed. Reporting the failure without auditing repeats that mistake, merely honestly.
-Instead (full protocol in `review_rubric.md` §7):
+Full protocol in `review_rubric.md` §7.
 
-1. Reconstruct the whole chain, raw data → claim: datasets used and excluded; ranges and regimes;
-   every reduction, mask, and fit window; every calibration/zero/gain and whether it was
-   self-measured or inherited; every model **and the domain of validity it was borrowed with**.
-2. Have the reviewer judge **the chain, not the figure** — links ranked by load-bearing ×
-   unsupported.
-3. **Test the data-scope links first** — chosen earliest, questioned least.
-4. Change the data constraints and re-run: widen the range, add the excluded runs, move to the
-   neighbouring regime, vary the axis held fixed, or use a better-conditioned dataset.
-5. Only if the audit comes up empty, report not-yet-defensible with the pipeline table, the weak
-   link, and a `journal/data_requests.md` entry (§4). Never a softened claim.
+1. **Do NOT report "not defensible" yet.** The usual cause is that the analysis is being refined
+   *inside* a badly-chosen data scope, because the runs, range, and regime were picked first and
+   are now treated as fixed.
+2. **Have the reviewer judge the chain, not the figure.** It reads the chain you recorded and the
+   perturbation numbers you already reported (§5), and works through them item by item asking two
+   questions of each: how much does the claim depend on this, and how well is it justified? The
+   item most depended on and least justified is the weak point. Start with the data-scope items,
+   chosen earliest and questioned least. The reviewer does not re-run the perturbation.
+3. **Only if that comes up empty**, write the measurement request (§4) whose parameters would pin
+   this hypothesis down, folding in any other open question whose discriminator needs a similar
+   sweep so one experiment settles several. Then report not-yet-defensible with the pipeline
+   table and the weak link. Never a softened claim.
 
 ## 10. Directed mode — two-model split (director + executor)
 

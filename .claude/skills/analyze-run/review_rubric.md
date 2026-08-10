@@ -32,8 +32,15 @@ Check, for every computational step:
   removal? Masking that quietly drops data is a gap even if the figure looks clean.
 - **Offsets and zeros.** Self-measured or inherited? Applied to the channel the fit actually
   consumes? Right parity of method for the observable?
-- **Fit mechanics.** Window stated; exclusions stated; parameters carry uncertainties; quality
-  justified by a number, not by eye; the window covers the physically discriminating region.
+- **Fit mechanics.** Window stated; exclusions stated; parameters carry uncertainties; the
+  window covers the physically discriminating region. Quality carries **both** a number and a
+  written reading of the drawn fit; a number standing alone is a gap, and so is an unrecorded
+  impression. Where the two disagree the figure decides, and a fit whose number looks
+  respectable while the curve contradicts the data is a gap however good the χ². A visible
+  discrepancy must be **reconciled, not merely disclosed**: the analyst adjusts the window or the
+  model until figure and number agree and records that change, or states that the two could not be
+  reconciled and withdraws the number as a result. A step that reports the disagreement, keeps the
+  window, and still quotes the fitted value as a result is a gap.
 - **Interpolation.** Flagged, with bracketing measured points given.
 - **Metadata access.** Setpoints read from each dataset's own metadata, indexed so a missing key
   raises rather than silently yielding a default/NaN that propagates.
@@ -68,8 +75,10 @@ swept knob has been shown.
    robustness; showing it does not move when those choices move is.
 2. **Consistency across datasets** — checked against every dataset that bears on it, with
    **where it holds and where it breaks** stated explicitly.
-3. **Show everything** — nothing cropped, masked, or noise-floor-filtered unless the operator
-   asked; any fit-window mask is marked on the figure and the fit overlaid on unmasked data.
+3. **Show everything** — nothing cropped, cut, clipped, masked, or noise-floor-filtered unless
+   the operator asked; any fit-window mask is marked on the figure and the fit overlaid on
+   unmasked data.
+   The rule itself is in `lessons.md` under Data integrity; this is the check.
 4. **Record what was left out** — which runs, ranges, and regimes were used, which were excluded,
    and why. This is what lets a later audit re-open the choice instead of inheriting it.
 5. **Run/dataset ids and clear axis labels** on every figure.
@@ -116,27 +125,35 @@ visible instead of letting it hide in prose.
 ## 7. Duty C — pipeline audit (when the bar cannot be met)
 
 Triggered when a claim fails the bar and figure-level fixes will not close the gap. **Do not
-report "not defensible" yet** — that is the same mistake, merely stated honestly. The usual cause
-is that the analysis is being refined *inside* a badly-chosen data scope, because the runs, range,
-and regime were picked first and thereafter treated as fixed.
+report "not defensible" yet.** The usual cause is that the analysis is being refined *inside* a
+badly-chosen data scope, because the runs, range, and regime were picked first and thereafter
+treated as fixed.
+
+**The perturbation numbers arrive with the packet.** Moving the fit window and the seeds is the
+analyst's job, done before you are called (`SKILL.md` §5). You judge the reported numbers; you do
+not re-run them. If they are absent, that absence is itself a gap.
 
 1. **Reconstruct the chain**, raw data → claim, written out explicitly: datasets used and
    excluded; ranges, regimes, working points; every reduction, mask, and fit window; every
    calibration/zero/gain and whether it was self-measured or inherited; every model or formula
    **and the domain of validity it was borrowed with**; the inference step from number to claim.
-2. **Judge the chain, not the figure** — rank links by (load-bearing × unsupported).
-3. **Test the data-scope links first**, by default: they are chosen earliest and questioned least.
-4. **Change the data constraints and re-run** — widen the range, bring in excluded runs, move to
-   the neighbouring regime, vary the axis that was held fixed, or move to a better-conditioned
-   dataset in the family.
-5. **Only if the audit comes up empty**: report not-yet-defensible, delivering the pipeline table,
+2. **Judge the chain, not the figure.** Work through it item by item, asking two questions of
+   each: how much does the claim depend on this, and how well is it justified? The item most
+   depended on and least justified is the weak point. Start with the data-scope items, chosen
+   earliest and questioned least.
+3. **Only if the audit comes up empty**: report not-yet-defensible, delivering the pipeline table,
    the identified weak link, and a concrete `journal/data_requests.md` entry for the measurement
-   that would close it. Never a softened claim.
+   that would close it, folded together with any other open question whose discriminator needs a
+   similar sweep. Never a softened claim.
 
 ## 8. Output contract
 
 Gaps are **numbered** so a subset can be endorsed or dismissed. Computation gaps (Duty A) are
 listed first and marked, because they matter most.
+
+**Order gaps by dependence × justification**: how much the claim depends on what the gap names,
+times how poorly that is justified. Report them in that order, computation gaps first within it.
+Raise as many as you find; the ordering is what makes a long list usable.
 
 ```
 VERDICT: pass | fail        STAGE: intermediate | key

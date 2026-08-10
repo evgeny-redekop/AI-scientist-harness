@@ -94,13 +94,26 @@ session only). "Re-fold lessons" = regroup bullets topically; archives untouched
   fitted range as an extrapolation on the figure. [2026-07-26]
 - State the fit window and the exclusions, and report every parameter with its uncertainty.
   (Hughes & Hase 2010; Taylor 1997)
-- Quantify fit quality with a number (reduced χ², residual structure) and resolve that number
-  against the control parameter, drawing the fit on the data at several values spanning its
-  range. An aggregate rms is admissible only once you have shown the rms is flat across the
-  range; otherwise it conceals a model that fits well in one part and fails in another, and it
-  will select the wrong model. The same applies to a median quoted over a range-interpolated
-  result: check it against the points that actually produce the answer.
-  (Bevington; Andrae 2010) [2026-07-26]
+- Quantify fit quality with a number (reduced χ², residual structure), computed over the
+  physically discriminating region of the curve, meaning the transition itself, and report it
+  per curve: one value for each setting of the control parameter, with the fit drawn on the data
+  at several settings spanning its range. A goodness metric dominated by a flat plateau is
+  degenerate (anything flat "fits" it) and will steer any window optimizer to the wrong region.
+  An aggregate rms is admissible only once you have shown the rms is flat across the range;
+  otherwise it conceals a model that fits well in one part and fails in another, and it will
+  select the wrong model. The same applies to a median quoted over a range-interpolated result:
+  check it against the points that actually produce the answer. (Bevington; Andrae 2010)
+  [2026-07-14, 2026-07-26]
+- A fit is judged twice, by its number and by its drawn shape, and the reading of the shape is
+  written down. After looking at the fit figure, record in that step's markdown where the curve
+  tracks the data, where it departs, and whether the residuals show structure. Where the number
+  and the figure disagree the figure decides, and the disagreement is reported rather than
+  resolved silently. An assessment that stays in your head cannot be checked or argued with, and
+  the operator's teaching this rule comes from was "rely less on statistical values and look more
+  at how the fits look" (2026-07-26), which an earlier distillation inverted into "justify quality
+  with a number, not by eye". Real cost: a Halperin-Nelson scan with a respectable objective
+  returned a boundary T_BKT and an ordering that contradicted the raw curves; the arm caught it
+  only by looking at the data, and nothing had required it to say so. [2026-08-08]
 - Prefer self-measured calibrations to stored values: measure zeros/offsets from the
   symmetry of the data in hand rather than a nominal axis value; report any drift from the
   stored value, and always state which zero/calibration you used.
@@ -123,21 +136,19 @@ session only). "Re-fold lessons" = regroup bullets topically; archives untouched
   sharp features. On a steep feature, a settled fixed-setpoint measurement outranks the
   swept trace: treat the swept apex as a lower bound, and prefer step-and-settle
   acquisition when the feature itself is the target. [2026-07-14]
-- Judge fit quality by the residuals over the physically discriminating region of the curve
-  — the transition, not a flat plateau. A plateau-dominated goodness metric is degenerate
-  (anything flat "fits" it) and will steer any window optimizer to the wrong region.
-  [2026-07-14]
-- When the extracted value could plausibly depend on the fit-window choice, vary the window
-  edges and report how much the result moves. Use judgment: a quick sensitivity check where
-  it matters, not a ritual for every fit. [2026-07-14]
-- Before running any bounded fit or bounded search, CHECK EVERY BOUND AND SEED: each initial
-  guess must lie strictly inside its own bounds, and each bound must admit the values the data
-  plausibly needs. A seed outside its bound makes the optimizer raise, the point is recorded as
-  a failure, and the failure then reads as "the model cannot describe the data here" when it is
-  really a coding error — the most expensive kind, because it looks like a result. The same
-  applies to fit windows and search ranges: an optimizer or peak-finder that can rail against a
-  range edge will return the edge, not a measurement, so report how often a bound is active and
-  widen it to check. [2026-07-26]
+- A fitted number must survive the choices that produced it. Before running any bounded fit or
+  bounded search, CHECK EVERY BOUND AND SEED: each initial guess must lie strictly inside its own
+  bounds, and each bound must admit the values the data plausibly needs. A seed outside its bound
+  makes the optimizer raise, the point is recorded as a failure, and the failure then reads as
+  "the model cannot describe the data here" when it is really a coding error, the most expensive
+  kind because it looks like a result. An optimizer or peak-finder that can rail against a range
+  edge returns the edge rather than a measurement, so report how often a bound is active and widen
+  it to check. Then move the window edges and the sub-range and report how far the number moves,
+  as σ_syst/σ_stat against the fit's own uncertainty: a T_BKT that depends on where the
+  temperature window was cut is a property of the window. For a power-law or scaling quantity
+  report the log sensitivity d(ln θ)/d(ln w) as well; flat across a sliding log window marks a
+  real scaling regime, drifting marks a crossover fitted over a finite range.
+  [2026-07-14, 2026-07-26, merged 2026-08-03]
 
 ### Extracting a quantity and plotting its dependence
 - Any quantity extracted per curve (a fit parameter, a peak position, a width, an edge, a
