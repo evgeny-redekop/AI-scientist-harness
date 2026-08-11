@@ -1,0 +1,8 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    ".claude/skills/analyze-run/SKILL.md",
+    ".claude/skills/analyze-run/lessons.md",
+    ".claude/integrations.md"
+  ]
+}
