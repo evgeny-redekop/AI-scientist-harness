@@ -202,6 +202,21 @@ session only). "Re-fold lessons" = regroup bullets topically; archives untouched
   correct conversion need not change the on-plot structure. Distinguish a genuine null from
   a bug by bringing in the rest of the family, not by re-deriving the conversion.
   [2026-07-14]
+
+### Narration and figure captions
+- Notebook narration is written in the register of a scientific publication: clear, concise,
+  jargon-free declarative statements, and every word carries meaning. Cut any sentence whose
+  removal leaves the meaning intact. Avoid the machine-writing tells: a bolded aphorism
+  sealing a section, negation used as a heading, three-item rhetorical chains, a template
+  stem repeated across parallel items, em dashes, and "X, not Y" antithesis constructions.
+  A step's explanation must be understandable to a reader with no specialist vocabulary;
+  where a technical term is unavoidable, say in plain words what it means at first use.
+  [2026-08-22]
+- Every figure carries a clear, concise, readable title, and a caption in the notebook
+  markdown beside it. The caption describes each panel in language a reader who has not read
+  the notebook up to this figure can follow, and states explicitly why the figure was made,
+  what purpose it serves in the analysis, and what the reader should take away from it.
+  [2026-08-22]
 <!-- LESSONS:END -->
 
 ## Raw teaching archive
