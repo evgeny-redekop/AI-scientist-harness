@@ -236,11 +236,41 @@ this repository are the ones that run, in the main checkout and in every worktre
 |---|---|---|
 | `analyze_run_autoload.sh` | `SessionStart` (startup, resume, clear, compact) | Walks up from the cwd to the nearest `analyze-run/SKILL.md` and emits a short notice that its rules bind this session. Emits nothing outside a harness checkout |
 | `notebook_sync.sh` | `PreToolUse: Read` (pull), `PostToolUse: Edit\|Write` (push) | Mirrors a jupytext `.py` edited inside a worktree onto the live `.ipynb` in the project folder, and pulls the live version back before a read. Anything it would overwrite is copied to a timestamped backup directory first. Needs `jupytext` on `PATH` or at `$JUPYTEXT_BIN` |
+| `db_guard.py` | `PreToolUse: Bash` | Refuses any shell command that would modify a raw-data file the device profile has declared protected. See below |
 
-Both hooks are deliberately small and always exit 0, so a failure can never block a session or a
-tool call. Registering them from inside the repository is also deliberate: a settings path
-pointing at a copy elsewhere on the machine drifts, and edits to the tracked file then have no
-effect on real sessions. Claude Code will ask you once to approve the project settings.
+The hooks are deliberately small and always exit 0. `db_guard.py` is the only one that stops a
+tool call, and it does so by returning a deny decision rather than by failing; a fault inside it
+lets the command through. Registering them from inside the repository is also deliberate: a
+settings path pointing at a copy elsewhere on the machine drifts, and edits to the tracked file
+then have no effect on real sessions. Claude Code will ask you once to approve the project
+settings.
+
+#### Protecting the raw data files
+
+Your raw measurement files are the scientific record, and no analysis has any reason to write to
+one. An AI that can run shell commands can delete or overwrite a file as easily as it can read
+it, and a single mistyped path in a refresh command destroys data no version control holds.
+`db_guard.py` refuses that before the command runs: deletion, moving, truncation, redirection
+into the file, in-place editing, write SQL, the Python equivalents through `os`, `shutil`,
+`pathlib` and `open`, and a copy that would carry the file out of the checkout and over the
+original. Reading stays untouched, and so does copying a master file over the local working
+copy.
+
+Which files are protected is declared in the device profile, not in the script:
+
+```markdown
+<!-- PROTECTED-FILES:BEGIN -->
+mydevice_2026.db
+<!-- PROTECTED-FILES:END -->
+```
+
+The hook reads that block from every `devices/*/profile.md`, so protecting a newly created file
+is one line in the profile with no change to the script or the hook registration. A name is
+matched as plain text anywhere in the command, which covers sidecars such as SQLite's `-wal` and
+`-shm` for free. The `if` filter in `.claude/settings.json` spawns the script only for commands
+mentioning a `.db`; widen that pattern if your data files have another extension. Two gaps are
+known: a command that reaches a file through a glob such as `rm *.db` names nothing on the list,
+and an empty block protects nothing, which the hook reports on stderr.
 
 ### Experiment layer
 
@@ -299,7 +329,9 @@ answered honestly.
    pull from there.
 2. `cp -r devices/TEMPLATE devices/<your-experiment>` and fill in `profile.md`. See
    [What you bring](#what-you-bring) for the content; section 2 (data access and loading) is the
-   one that unblocks everything else.
+   one that unblocks everything else. List your raw-data filenames between the `PROTECTED-FILES`
+   markers there, one per line, and `db_guard.py` will refuse any shell command that would
+   modify them. Do the same when a new data file is created later.
 3. Vendor your loader under `devices/<your-experiment>/lib/`. It should read completed runs and
    do nothing else: no instrument control, no dependency outside this repository.
 4. Seed `journal/` from `journal/SCHEMA.md`: at minimum `open_questions.md`, plus empty

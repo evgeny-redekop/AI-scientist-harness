@@ -20,6 +20,17 @@
             "command": "\"$CLAUDE_PROJECT_DIR/hooks/notebook_sync.sh\" pull"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(*.db*)",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/hooks/db_guard.py\"",
+            "statusMessage": "Checking no protected data file is being modified..."
+          }
+        ]
       }
     ],
     "PostToolUse": [

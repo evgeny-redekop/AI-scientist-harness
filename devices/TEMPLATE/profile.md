@@ -16,6 +16,17 @@ hygiene, the sanctioned loader in `lib/` with a copy-paste snippet, how per-run 
 (gains, amplitudes, setpoints) is read, and any metadata traps (stale readbacks, values not
 captured by the logging system).>
 
+**Protected files.** `hooks/db_guard.py` reads the block below before every shell command and
+refuses any that would delete, move, truncate, overwrite or rewrite one of the files named in
+it. Reading stays allowed, and so does copying a fresh master over the local working copy. A
+name is matched as plain text anywhere in the command, so sidecar files such as SQLite's
+`-wal` and `-shm` are covered by the database name itself. List one filename per line, with
+no path. An empty block means nothing is protected, and the hook says so on stderr.
+
+<!-- PROTECTED-FILES:BEGIN -->
+<one raw-data filename per line, e.g. mydevice_2026.db>
+<!-- PROTECTED-FILES:END -->
+
 ## 3. Units & normalization
 <The reporting units for the primary observable(s) and the exact normalization formula with
 constants.>
