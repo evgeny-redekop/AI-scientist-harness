@@ -18,8 +18,8 @@ device-independent; device facts, calibrations, and data loading come from the p
 2. Read this skill's `lessons.md` (non-negotiable generic rules).
 3. Follow the profile's data-access instructions exactly (loader, database hygiene,
    freshness/refresh steps, metadata conventions).
-4. Check whether **directed mode** applies (§10) — if so, set up the executor before
-   touching any data.
+4. Set up the **executor** before touching any data (§10): directed mode is the default for
+   every analysis, and the main session writes and runs no analysis code.
 
 ## 1. Deliverable is opt-in — notebook on request only
 
@@ -223,15 +223,27 @@ Full protocol in `review_rubric.md` §7.
 
 ## 10. Directed mode — two-model split (director + executor)
 
-Applies when the session runs on a **stronger model than the `analysis-executor` agent's
-pinned model** (you know your own model; the executor's is in its frontmatter), or whenever
-the user asks for directed mode. Then the flow for any analysis is:
+**This is the default for every analysis** (operator ruling 2026-09-03), whatever model the
+session runs on: the session directs, an `analysis-executor` agent computes. The only
+exception is a CLI with no subagents, which runs both roles itself in separate passes and
+says so. The flow for any analysis is:
 
 - **You direct; the executor computes.** Never write or run analysis code in the main loop.
-  Spawn ONE `analysis-executor` agent per analysis and keep it for the whole analysis —
-  continue it via SendMessage so it retains the notebook, data, and environment context
-  across steps. Its first dispatch packet names the device profile/lessons paths and the
-  analysis directory.
+  Spawn an `analysis-executor` agent per analysis, with worktree isolation, and continue it
+  via SendMessage across steps. Its first dispatch packet names the device profile/lessons
+  paths and the analysis directory.
+- **Replace the executor every three dispatches, or sooner if a report runs long.** Each
+  reply re-sends the executor's whole transcript, so a long-lived executor costs five to ten
+  times more per dispatch by its thirtieth step (765k cumulative tokens on one lane of the
+  2026-09-02 session) and its attention degrades; compaction, when it fires, drops the small
+  facts a dispatch needs. The executor keeps everything it needs in
+  `<analysis dir>/EXECUTOR_STATE.md` (cell index, helper signatures, adopted constants with
+  provenance, data access, pitfalls, open dispatch; see `analysis-executor.md`), rewritten
+  at the end of every dispatch before the commit. A fresh executor reads that file and the
+  notebook's cell headers, never the whole notebook, so a restart costs about 20k tokens.
+  Do not spawn the replacement until the outgoing executor's last report confirms the state
+  file was rewritten; if it did not, dispatch that first. The reviewer is fresh for every
+  review already and stays that way.
 - **First dispatch = the quick overview:** load per the profile, print dimensions,
   setpoints, and full data ranges, produce the uncropped all-datasets overview figure (§2).
 - **Then think.** Read the returned PNGs YOURSELF (§5's read-the-PNG rule binds the

@@ -18,6 +18,37 @@ from the profile paths given in your dispatch packet.
    generic rules in `.claude/skills/analyze-run/lessons.md` (all non-negotiable).
 2. Follow the profile's data-access instructions exactly: sanctioned loader, database
    refresh hygiene, interpreter/environment, metadata conventions.
+3. Read the analysis directory's `EXECUTOR_STATE.md` if it exists (the previous executor's
+   working state, see below) and the cell headers of the notebook
+   (`grep -n '^# %%' <topic>.py`). Do NOT read the whole notebook: a 4,000-line notebook
+   costs 50k tokens and the state file carries what you need. Read a cell in full only when
+   the dispatch names it or you must call a helper defined in it. If no state file exists,
+   write one from the headers and the helper signatures before doing anything else.
+
+## Working state file, `EXECUTOR_STATE.md`
+
+Nothing you know has to live in your transcript; it all comes from files you can re-read.
+Your transcript grows with every dispatch (an executor that ran thirty dispatches was billed
+765k tokens because each reply re-sends the whole history), so the director replaces you with
+a fresh executor every few dispatches, and the fresh one starts from this file. Keep it
+current or the restart loses the facts a dispatch needs.
+
+At the END of every dispatch, before the commit, rewrite `EXECUTOR_STATE.md` in the analysis
+directory (under about 150 lines):
+
+- Cell index: every `# %%` cell with its line number, its step, and one line on what it
+  computes or defines.
+- Helpers: every function or class defined in the notebook, its signature, which cell defines
+  it, and what it returns.
+- Adopted constants with provenance: gains, zeros, anchors, periods, thresholds, and the
+  cell and printed value each came from; which are director choices (say so).
+- Data access: loader used, cache files and where they live, run ids loaded, database path.
+- Pitfalls met: guard refusals, sync hazards, shared-scratch collisions, anything that cost a
+  retry, one line each with the fix.
+- Open dispatch: the director's last instruction and where it was left if incomplete.
+
+The file is a working note, committed with the notebook. It carries no interpretation and no
+narration; those are the director's.
 
 ## Every step
 
@@ -55,3 +86,6 @@ objection does not apply. A bare disagreement is not a contest.
    description only, no interpretation.
 4. Anomalies flagged, not interpreted: load errors, NaNs, empty sweeps, values that
    contradict the dispatch's stated expectations, suspiciously quantized/flat channels.
+5. One line confirming `EXECUTOR_STATE.md` was rewritten and its line count, and the number
+   of dispatches this executor has now served (the director uses it to decide when to
+   replace you).

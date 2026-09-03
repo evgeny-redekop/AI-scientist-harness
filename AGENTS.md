@@ -58,9 +58,11 @@ directory under `devices/` (start from `devices/TEMPLATE/`) and update this poin
   independent critic behind the always-on review loop (`analyze-run` §9), which audits the
   computation in a step's code, scores figures against a per-objective rubric, and audits the
   whole pipeline when a claim will not firm up; plus `analysis-executor` — the executor half of
-  **directed mode** (`analyze-run` §10). When the session model outranks the executor's pinned
-  model, the session directs and the executor computes; it is hands, never head. A CLI without
-  subagents runs these roles itself, in a separate pass with the same inputs, and says so.
+  **directed mode** (`analyze-run` §10), which is the default for every analysis: the session
+  directs and the executor computes; it is hands, never head. Executors are replaced every few
+  dispatches and hand over through `EXECUTOR_STATE.md` in the analysis directory, so no
+  executor's transcript grows without bound. A CLI without subagents runs these roles itself,
+  in a separate pass with the same inputs, and says so.
 - **Hooks** (`hooks/`, registered in `.claude/settings.json`, a Claude Code mechanism):
   `notebook_sync.sh` mirrors worktree `.py` edits onto the live `.ipynb`;
   `analyze_run_autoload.sh` marks the `analyze-run` rules active at session start. Under
