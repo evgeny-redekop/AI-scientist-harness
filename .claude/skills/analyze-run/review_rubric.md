@@ -53,7 +53,11 @@ Staging governs presentation completeness only and never softens Duty A.
 - **INTERMEDIATE** (the analyst does not claim the analysis is finished): judge only whether the
   figure credibly does what this step claims: real structure, mechanically sound (axes, units,
   labels, no blank panels, no rendering artefact), and no lead with descriptive statistics.
-  Criteria belonging to the finished key figure are out of scope. Default to pass.
+  Criteria belonging to the finished key figure are out of scope. Default to pass. On a step
+  whose figure only re-plots a quantity audited at an earlier step, Duty B is skipped apart from
+  the four defects below; Duty A still runs. Across 35 gaps at four gates in July and August and
+  108 in the run-916 campaign, every gap that changed a number was a computation gap or one of
+  those four defects. [2026-09-03]
 - **KEY** (presented as the analysis result, or any stated conclusion): enforce the full rubric.
 
 Four defects are gaps even at INTERMEDIATE stage, because the step then does not do what it
@@ -101,9 +105,6 @@ Figure-integrity checks (defect 4), applied to the figure and the code that drew
 5. **Run or dataset ids and clear axis labels** on every figure.
 6. **Independence.** Corroborating checks share no hidden assumption (the same calibration,
    anchor or noise floor); two checks sharing one are one check.
-7. **Applicability contour.** Every stated instrument limit (excitation ceiling, noise floor,
-   range) is drawn on the figure the claim is read from, with the fraction of points outside it
-   printed; a claim read beyond the limit is capped at suggestive.
 
 ## 4. Rubric generation (per analysis)
 
@@ -203,5 +204,13 @@ something to report.
 - On reconsideration the reviewer may add at most one new gap, and only for a concrete
   computational error the image hides; a style point does not qualify.
 - A clean pass skips the rebuttal.
-- Reviewer malfunction (unparseable output, tool failure) fails open: proceed and say so loudly.
-  A substantive failure never fails open.
+- Reviewer malfunction (unparseable output, tool failure) fails open: proceed to the gate, and
+  present the step as unreviewed, never as passed. In June 2026 all seven KEY verdicts of one
+  campaign read "judge reply unparseable, treated as advisory pass" and every one went through
+  as a pass. A substantive failure never fails open.
+- Three patterns are logged in the step's markdown when they occur, because each has passed a
+  defective step before: a review whose gaps are all accepted and none changes a number (33
+  accepts and no contest before 2026-07-27; nine accepts on 2026-08-02 followed by the operator
+  rejecting the step whole); a gap repeated from the previous step's review, which is fixed in
+  the code or contested with the line and never accepted twice (one gap raised six times in
+  June); and an executor report carrying more cells than the dispatch named. [2026-09-03]

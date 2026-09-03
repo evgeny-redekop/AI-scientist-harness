@@ -35,6 +35,17 @@ lessons" means regroup bullets topically; archives stay untouched.
   31 runs, each found after a number built on the record had been presented. [2026-09-03]
 - Confirm a constant knob in the narration by quoting its value from the metadata. A figure whose
   only purpose is to confirm a fixed parameter is a wasted step.
+- Read the unit of every swept axis from the parameter's own metadata and check the axis against
+  a scale the physics fixes (a flux period, a known transition) before any conversion. A field
+  axis stored in mT was read as mA and divided by a mA-per-mT factor five times in three days of
+  June 2026; one of those finished with f = 1 at 175.7 mT, a factor 55, and no reviewer caught
+  it. [2026-09-03]
+- Re-derive every normalisation constant (array size, aspect ratio, cell pitch, divider) from
+  counted structure once per device, cross-check it against an independent measurement in the
+  data, and date it in the profile. A stored factor is not evidence: the outline 0.22 × 0.58 mm
+  and the width 70 cells were carried through every notebook from June to August 2026, two
+  finite-size "confirmations" matched the wrong width to 1 %, and blind referees flagged a 0.70
+  constant in the same files and never the geometry. [2026-09-03]
 
 ### Data integrity
 - The first figure shows everything the instrument recorded, all datasets together, full range,
@@ -50,6 +61,11 @@ lessons" means regroup bullets topically; archives stay untouched.
   works.
 - Variation at or below the grid pitch of the swept axis, or below the measured noise, is
   unresolved. Do not read it as a feature or a period.
+- Before any row anchors a fit or a calibration, test each row for coherence against its
+  neighbours: a row that departs by a common factor on more than one channel is an acquisition
+  fault, excised and named in the narration. One 135 mK row was the BKT anchor of two sessions
+  in July 2026; excising it moved the peak from 155 to 215 mK and shifted 44 % of the columns.
+  [2026-09-03]
 - When the primary metric is nearly flat in the swept parameter, look for the dependence in the
   quantity that carries it (an intensity, a width) rather than forcing it onto the flat metric.
 - When the operator asks for a specific choice that does not generalise (a tuned constant, a
@@ -161,6 +177,12 @@ lessons" means regroup bullets topically; archives stay untouched.
   it open and thereby claims the swept axis is bistable, which needs its own evidence. Exclude an
   inadmissible model however well it fits. The measurement that would overturn the limit is a
   rate ladder taken in both directions. [2026-08-22]
+- A systematic that acts on every family at once is common-mode: apply each recipe variant to
+  all families together and form the ratio under each variant, then compare the resulting
+  spread against the per-item precision it acts on, never against the per-point random error.
+  A band built the other way is inflated by about √2 and put the value 0.50 inside a band that
+  excluded it (2026-07-26); comparing a common-mode term against a per-point error flattered a
+  margin by the square root of the sample size, 22 against 3.2 (run 916, Step 5a). [2026-09-03]
 
 ### Extracting a quantity and plotting its dependence
 - Any quantity extracted per curve (a fit parameter, a peak position, a width, an edge, a
@@ -201,6 +223,13 @@ lessons" means regroup bullets topically; archives stay untouched.
   from zero returns that offset whenever the feature is narrower than the grid. Draw a flagged
   bound at the bound (scan end, grid step) with a symbol for its direction, and derive nothing
   else from that row. [2026-07-14, 2026-09-03]
+- A null obtained from a statistic carries an injection test: add a known amount of the effect
+  being ruled out, recompute the statistic, and report where it starts to move. Where it does
+  not move the null is withdrawn to a bound at the smallest injection it resolves. Four nulls
+  were reversed before the test existed: three empty peak searches in June 2026 (one on an axis
+  in the wrong unit), a seed outside its bound reported as "b ≤ 1 cannot fit the data"
+  (2026-07-26), and a median artifact reported as "0.50 is never reachable" the same day. The
+  test itself first ran on run 916, Step 5b. [2026-09-03]
 - Analyse all the data: every point and the full range of every dataset, so the regime a
   hypothesis predicts is bracketed. Figures show at least a representative subset and at most
   everything; the analysis never silently restricts itself to a sub-range. [2026-07-14]
@@ -219,6 +248,10 @@ lessons" means regroup bullets topically; archives stay untouched.
 - Every figure has a clear, brief title and a caption in the markdown beside it. The caption
   describes each panel for a reader who has not read the notebook so far, says why the figure was
   made, and says what to take from it. [2026-08-22]
+- Every number in a markdown cell is regenerated by the printout of the code cell beside it; none
+  is typed by hand, and a header constant is a printed constant. Headers drifted from the code
+  they described through the July 2026 notebooks: the April field anchor and period in a header
+  while the code used the July anchor, and the wrong geometry in every header. [2026-09-03]
 <!-- LESSONS:END -->
 
 ## Raw teaching archive

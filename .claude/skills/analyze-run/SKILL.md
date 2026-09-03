@@ -162,7 +162,8 @@ Two review objects, and most of the value is in the first:
   this step claims (default pass; finished-paper criteria out of scope). KEY, for any stated
   conclusion or result figure, applies the full rubric. Staging governs presentation completeness
   only and leaves correctness untouched; the defects that are gaps even at INTERMEDIATE are listed
-  in rubric §2, which is the copy to edit when the list changes.
+  in rubric §2, which is the copy to edit when the list changes. A step whose figure only
+  re-plots a quantity audited earlier gets Duty A and those defects, and no other Duty B.
 
 The loop: a blind pass from the figure, the objective and the rubric, with your narrative
 withheld, and then, if there are gaps, a rebuttal in this exact format, one line per gap:
@@ -179,7 +180,10 @@ CONTEST is the exact line, the exact value or formula, and the exact reason the 
 not apply. The reviewer rejects a rebuttal that lacks a `GAP X:` line for any gap it raised. A
 gap is dropped only for a correct, specific data or physics reason; a bare disagreement or a
 promise to fix later does not qualify. A clean pass skips the rebuttal. Reviewer malfunction
-fails open (proceed and say so loudly); a substantive failure never does.
+fails open: proceed to the gate and present the step as unreviewed, never as passed; a
+substantive failure never fails open. Rubric §9 names three review-loop patterns to log when
+they occur (all gaps accepted with no number changed, a gap repeated from the previous review,
+an executor report with more cells than dispatched).
 
 Then present at the step gate (§6) and wait.
 
